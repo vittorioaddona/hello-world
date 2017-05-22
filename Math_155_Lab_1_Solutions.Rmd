@@ -1,0 +1,164 @@
+---
+title: 'Math 155 Lab # 1 Solutions'
+output: html_document
+---
+
+```{r}
+MacClass2012 = read.csv('http://www.macalester.edu/~addona/MacClass2012.csv')
+```
+
+### Question 1.
+
+```{r}
+boxplot( MacClass2012$FYGPA )
+
+hist( MacClass2012$FYGPA , breaks=25 )
+```
+
+**The boxplot's lower whisker is substantially longer than its upper whisker which, in addition to the identified potential outliers, indicate left-skewness.**
+
+**If you are looking at the histogram, then you can also see that there is a "tail" of observations on the left side of the graph, which indicates left-skewness.**
+
+
+### Question 2.
+
+**According to the 1.5 IQR rule of thumb, data points outside of 1.5 IQRs from the 25th and 75th percentiles are considered "potential outliers". Thus, here, first-year GPAs below: 3.29 - 1.5\*(3.73-3.29) = 2.63 would be considered potential outliers, using the information below:**
+
+```{r}
+quantile(MacClass2012$FYGPA)
+```
+
+The upper threshold is above 4, thus no potential outliers exist on the upper end.
+
+
+### Question 3.
+
+```{r}
+mean(MacClass2012$FYGPA)
+
+median(MacClass2012$FYGPA)
+```
+
+**Yes, the mean and median displayed above confirm the left-skewness noticed in 1. since the mean is substantially smaller than the median.**
+
+
+### Question 4.
+
+```{r}
+var(MacClass2012$FYGPA)
+```
+
+**Variance is the sqaure of the standard deviation.**
+
+Unfortunately, to avoid cancellation, we need to square the deviations, or residuals, before averaging them. **This means that the units of variance are squared units compared to the data (here, squared GPA points)**. This makes it extremely difficult to use variance directly. Thus, we define the standard deviation as the square root of variance, so that its units are the same as the variable of interest, here, FYGPA.
+
+
+### Question 5.
+
+```{r}
+boxplot( FYGPA ~ FYAid , data = MacClass2012 )
+```
+
+**No**, it does **not** seem like FYAid is a useful explanatory variable for modeling the response variriable, FYGPA, since (as the boxplots suggest) there is not much of a difference in the GPAs between the financial aid groups. Stated differently, our prediction, or "best guess", at someone's first-year GPA would not really change if given the information of which financial aid group that student belongs to.
+
+**Repeat for HSClassRank:**
+
+```{r}
+boxplot( FYGPA ~ HSClassRank , data = MacClass2012 )
+```
+
+**Yes**, HSClassRank seems like a very good variable for modeling FYGPA. This is because our belief about FYGPA definitely changes if given the information on HSClassRank.
+
+
+### Question 6.
+
+```{r}
+lm( FYGPA ~ 1 , data = MacClass2012 )
+```
+
+Generally, the coefficient from this "constant only model" (i.e. a model that uses no explanatory variables) **represents the mean of the response variable.** So, here, **3.455** is the average first-year GPA of the Class of 2012.
+
+
+### Question 7.
+
+```{r}
+# Storing the residuals from the constant only model:
+model = lm( FYGPA ~ 1 , data = MacClass2012 )
+Residuals = model$residuals
+
+# Finding the sum of squared residuals:
+sum( Residuals^2 )
+```
+
+**The sum of sqaured residuals for the constant only model is roughly 68.21.**
+
+
+### Question 8.
+
+**FYGPA vs. SATmath**
+
+```{r}
+plot( FYGPA ~ SATmath , data = MacClass2012 )
+```
+
+**FYGPA vs. ACT**
+
+```{r}
+plot( FYGPA ~ ACT , data = MacClass2012 )
+```
+
+**To the naked eye, it seems like the FYGPA vs. ACT relationship is stronger than the FYGPA vs. SATmath relationship. Both are positive relationships, but the FYGPA vs. ACT relationship seems more "steep", and has data which are more tightly packed around this positive trend.**
+
+
+### Question 9.
+
+```{r}
+lm( FYGPA ~ SATmath , data = MacClass2012 )
+```
+
+**Intercept: 3.1668650**
+
+**Slope: 0.0004382**
+
+```{r}
+lm( FYGPA ~ ACT , data = MacClass2012 )
+```
+
+**Intercept: 2.25684**
+
+**Slope: 0.04056**
+
+
+### Question 10.
+
+**Storing the FYGPA vs. SATmath model (m1):**
+
+```{r}
+m1 = lm( FYGPA ~ SATmath , data = MacClass2012 )
+```
+
+**Finding the sum of squared residuals for m1:**
+
+```{r}
+sum( m1$residuals^2 )
+```
+
+**Storing the FYGPA vs. ACT model (m2):**
+
+```{r}
+m2 = lm( FYGPA ~ ACT , data = MacClass2012 )
+```
+
+**Finding the sum of squared residuals for m2:**
+
+```{r}
+sum( m2$residuals^2 )
+```
+
+**Yes, as we saw informally from the graphs in 8., the FYGPA vs. ACT relationship is stronger. This is seen by the fact that the model which includes ACT produces a smaller sum of squared residuals than the model with SATmath.**
+
+
+### Question 11.
+
+**NO! Your friend's reasoning is most certainly NOT sound! These slopes (and all coefficients from models) have units. The units of these two slopes are not the same. One slope says that, roughly, FYGPA increases by 0.0004 for every 1-unit increase in SATmath. The other slope says that, roughly, FYGPA increases by 0.04 for every 1-unit increase in ACT. But a 1 point increase on the SATmath test and a 1 point increase on the ACT exam are not at all equivalent. Thus, one needs to be a bit more careful when comparing model coefficients.**
+
